@@ -40,12 +40,11 @@ int main (int argc, const char * argv[] ) {
         return -1;
     }
     int fd, max_op;
-    int fila_operaciones[7];
-    int leer_numero = 0, leido = 0, num_operacion = 0;
-    char buffer[3];
+    char buffer_max_op[3]
     fd = open(argv[1], O_RDNLY|O_CREAT|O_TRUNC, 0544);
-    
     /*Se estudia si el número máximo de operaciones no supera a 200.*/
+    read (fd, &buffer_max_op, 3);
+    max_op = atoi(buffer_max_op);
     if (max_op > 200){
         printf("Error. Se exceden las 200 operaciones.\n");
         close(fd);
