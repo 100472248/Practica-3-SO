@@ -40,6 +40,7 @@ int main (int argc, const char * argv[] ) {
         return -1;
     }
     int fd, max_op;
+    int client_numop = 0, bank_numop = 0, global_balance = 0;
     char buffer_max_op[3]
     fd = open(argv[1], O_RDNLY|O_CREAT|O_TRUNC, 0544);
     /*Se estudia si el número máximo de operaciones no supera a 200.*/
@@ -56,4 +57,24 @@ int main (int argc, const char * argv[] ) {
 
     close(fd);
     return 0;
+}
+
+void* cajero(){
+
+pthread_exit(-1);
+}
+
+void* trabajador(){
+
+pthread_exit(-1);
+}
+
+char leer_orden(int fichero, int posicion_inicial) {
+    char buffer, palabra[10];
+    int lectura = 0;
+    lseek(fichero, posicion_inicial, 0);
+    while (lectura < 2){
+        read(fichero, &buffer, 1);
+        if 
+    }
 }
