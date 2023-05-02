@@ -22,7 +22,13 @@
  */
 
 int client_numop = 0, bank_numop = 0, global_balance = 0;
- mutex_t mut;
+mutex_t mut;
+struct operacion {
+    char operacion[9];
+    char cuenta;
+    char cuenta2;
+    char dinero[3];
+};
 
 int main (int argc, const char * argv[] ) {
     /*Como se tienen que meter 5 argumentos, argc debe valer 6 como mínimo.*/
@@ -31,38 +37,35 @@ int main (int argc, const char * argv[] ) {
         return -1;
     }
     /*Antes de empezar, vamos a comprobar que todo funciona correctamente.*/
-    if ((argv[2] < 0) || (argv[3] < 0)) {
+    if ((argv[3] < 0) || (argv[4] < 0)) {
         printf("Número de hilos negativo.\n");
         return -1;
     }
-    if (argv[4] < 1){
+    if (argv[5] < 1){
         printf("Número de cuentas máximo no positivo.\n");
         return -1;
     }
-    if (argv[5] < 1){
+    if (argv[6] < 1){
         printf("Longitud de cola imposible.\n");
         return -1;
     }
-    int fd, max_op;
-    int posicion_actual = 0;
-    int saldo_cuenta[argv[4]];
-    char buffer_max_op[3];
-    fd = open(argv[1], O_RDNLY|O_CREAT|O_TRUNC, 0544);
-    /*Se estudia si el número máximo de operaciones no supera a 200.*/
-    read (fd, &buffer_max_op, 3);
+    int max_op, fd;
+    char buffer_max_op[4];
+    char caracter_leido;
+    fd = open(argv[2], O_RDONLY, 0644);
+    while (caracter_leido != '\n') {
+        read(fd, buffer_max_op, 1);
+    }
     max_op = atoi(buffer_max_op);
     if (max_op > 200){
         printf("Error. Se exceden las 200 operaciones.\n");
         close(fd);
         return(-1);
     }
-    int list_client_ops[max_op];
-    
+    operacion *list_num_ops[] = (operacion*)malloc(sizeof(operacion) * max_op);
 
 
 
-
-    close(fd);
     return 0;
 }
 
