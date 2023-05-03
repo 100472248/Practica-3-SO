@@ -4,12 +4,18 @@
 
 struct element {
 	// Define the struct yourself
-	int param1;
+	char operacion [9]; // nombre de la operacion
+    char cuenta1; // numero de cuenta
+    char cuenta2; // segunda cuenta
+    int cantidad; // cantidad a depositar
+
 };
 
 typedef struct queue {
 	// Define the struct yourself
-	int param1;
+	int element; // elemento
+    int head = 0; // indice para el primer elemento del queue
+    int tail = 0; // indice para el ultimo elemento del queue
 }queue;
 
 queue* queue_init (int size);

@@ -19,31 +19,35 @@ queue* queue_init(int size){
 
 // To Enqueue an element
 int queue_put(queue *q, struct element* x) {
-    int i = 0;
-    while (0 != q[i].param1){ // iterate through all the filled places
-        i ++;
-    }
-    q[i].param1 = x;
+    // first check capacity before puting an element
+    int checK_capacity = queue_full(q);
+    while (1 == checK_capacity){   // loop until queue is empty
+        checK_capacity = queue_full(q);
+
 	return 0;
 }
 
 
 // To Dequeue an element.
 struct element* queue_get(queue *q) {
+    int check_capacity = queue_empty(q);
+    if (1 == check_capacity){
+        check_capacity = queue_empty(q); // loop until the queue has an element
+    }
 	struct element* element;
 	
-	return element;
+	return element; // return element
 }
 
 
 //To check queue state
 int queue_empty(queue *q){
-	
+
 	return 0;
 }
 
 int queue_full(queue *q){
-	
+
 	return 0;
 }
 
@@ -57,21 +61,21 @@ int queue_destroy(queue *q){
 
     queue *q;
     struct element s1;
-    s1.param1 = 3;
+    s1.element = 3;
     struct element * ptr;
     ptr = &s1;
     q = queue_init(5);
     queue_put(q,ptr);
-    s1.param1 = 4;
+    s1.element = 4;
     queue_put(q, ptr);
 //    int i;
-//    while (0 == q->param1){
+//    while (0 == q->element){
 //        i ++;
 //    }
     struct element * aux;
-    aux = q[0].param1;
+    aux = q[0].element;
 
-    printf("%d\n", aux->param1);*/
+    printf("%d\n", aux->element);*/
 
 
 
