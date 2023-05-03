@@ -38,15 +38,15 @@ int main (int argc, const char * argv[] ) {
         return -1;
     }
     /*Antes de empezar, vamos a comprobar que todo funciona correctamente.*/
-    if ((argv[3] < 0) || (argv[4] < 0)) {
+    if ((atoi(argv[3]) < 0) || (atoi(argv[4]) < 0)) {
         printf("Número de hilos negativo.\n");
         return -1;
     }
-    if (argv[5] < 1){
+    if (atoi(argv[5]) < 1){
         printf("Número de cuentas máximo no positivo.\n");
         return -1;
     }
-    if (argv[6] < 1){
+    if (atoi(argv[6]) < 1){
         printf("Longitud de cola imposible.\n");
         return -1;
     }
@@ -68,18 +68,18 @@ int main (int argc, const char * argv[] ) {
         }
         fscanf(fd, "%s", next_op);
         list_num_ops[num_operacion].operacion = next_op;
-        if (next_op == 'CREAR'){
+        if (strcmp(next_op, "CREAR") == 0){
             fscanf(fd, "%s", next_op);
             list_num_ops[num_operacion].cuenta = next_op;
             list_num_ops[num_operacion].dinero = 0;
         }
-        else if (next_op == 'INGRESAR' || next_op == 'RETIRAR'){
+        else if (strcmp(next_op, "INGRESAR") == 0 || strcmp(next_op, "RETIRAR") == 0 ){
             fscanf(fd, "%s", next_op);
             list_num_ops[num_operacion].cuenta= next_op;
             fscanf(fd, "%d", &cantidad);
             list_num_ops[num_operacion].dinero = cantidad;
         }
-        else if next_op == 'TRASPASAR'{
+        else if strcmp(next_op, "TRASPASAR") == 0 {
             fscanf(fd, "%s", next_op);
             list_num_ops[num_operacion].cuenta= next_op;
             fscanf(fd, "%s", next_op);
@@ -87,7 +87,7 @@ int main (int argc, const char * argv[] ) {
             fscanf(fd, "%d", &cantidad);
             list_num_ops[num_operacion].dinero = cantidad;
         }
-        else if next_op == 'SALDO'{
+        else if strcmp(next_op, "SALDO") == 0 {
             fscanf(fd, "%s", next_op);
             list_num_ops[num_operacion].cuenta= next_op;
         }
@@ -100,17 +100,17 @@ int main (int argc, const char * argv[] ) {
     /*SE analiza si max_op es correcta.*/
     if (max_op > 200){
         printf("Error. Se exceden las 200 operaciones.\n");
-        free(list_num_ops);
+        free(*list_num_ops);
         fclose(fd);
         return(-1);
     }
     if (num_operacion > max_op){
         printf("Error. El número de operaciones indicadas es mayor al permitido.\n");
-        free(list_num_ops);
+        free(*list_num_ops);
         fclose(fd);
         return(-1);
     }
-    free(list_num_ops);
+    free(*list_num_ops);
     fclose(fd);
     return 0;
 }
@@ -127,13 +127,13 @@ pthread_exit(-1);
 
 bool verifyStruct(struct operacion *clientes, int orden){
     operacion cliente = clientes[orden];
-    if (cliente.operacion == 'CREAR') {
+    if (strcmp(cliente.operacion, "CREAR") == 0) {
         int cuenta = atoi(&cliente->cuenta);
         if isdigit(cuenta) == False {
             return False;
         }
     }
-    if (cliente.operacion == 'INGRESAR' || cliente.operacion == 'RETIRAR') {
+    if (strcmp(cliente.operacion, "INGRESAR") == 0 || strcmp(cliente.operacion, "RETIRAR") == 0) {
         int cuenta = atoi(&cliente->cuenta);
         if isdigit(cuenta) == False {
             return False;
@@ -142,7 +142,7 @@ bool verifyStruct(struct operacion *clientes, int orden){
             return False
         }
    }
-    if (cliente.operacion == 'TRASPASAR') {
+    if (strcmp(cliente.operacion, "TRASPASAR") == 0) {
         int cuenta = atoi(&cliente->cuenta);
         if isdigit(cuenta) == False {
             return False;
@@ -155,7 +155,7 @@ bool verifyStruct(struct operacion *clientes, int orden){
             return False
         }
    }
-    if (cliente.operacion == 'SALDO') {
+    if (strcmp(cliente.operacion, "SALDO") == 0) {
         int cuenta = atoi(&cliente->cuenta);
         if isdigit(cuenta) == False {
             return False;
