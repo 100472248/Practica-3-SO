@@ -92,9 +92,10 @@ int main (int argc, const char * argv[] ) {
             list_num_ops[num_operacion].cuenta= next_op;
         }
         else {
-            fin = 0;
-        }
-        num_operacion ++;
+            fin = 0;}
+            
+        if verifyStruct(list_num_ops, num_operacion) == True {
+            num_operacion ++;}
     }
     /*SE analiza si max_op es correcta.*/
     if (max_op > 200){
@@ -126,7 +127,35 @@ pthread_exit(-1);
 
 bool verifyStruct(struct operacion *clientes, int orden){
     operacion cliente = clientes[orden];
-    if cliente.operacion == 'CREAR' {
+    if (cliente.operacion == 'CREAR') {
+        int cuenta = atoi(&cliente->cuenta);
+        if isdigit(cuenta) == False {
+            return False;
+        }
+    }
+    if (cliente.operacion == 'INGRESAR' || cliente.operacion == 'RETIRAR') {
+        int cuenta = atoi(&cliente->cuenta);
+        if isdigit(cuenta) == False {
+            return False;
+        }
+        if isdigit(cliente.dinero) == False {
+            return False
+        }
+   }
+    if (cliente.operacion == 'TRASPASAR') {
+        int cuenta = atoi(&cliente->cuenta);
+        if isdigit(cuenta) == False {
+            return False;
+        }
+        cuenta = atoi(&cliente->cuenta2);
+        if isdigit(cuenta) == False {
+            return False;
+        }
+        if isdigit(cliente.dinero) == False {
+            return False
+        }
+   }
+    if (cliente.operacion == 'SALDO') {
         int cuenta = atoi(&cliente->cuenta);
         if isdigit(cuenta) == False {
             return False;
