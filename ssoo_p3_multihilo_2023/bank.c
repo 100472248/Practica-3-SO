@@ -26,8 +26,8 @@ int client_numop = 0, bank_numop = 0, global_balance = 0;
 mutex_t mut;
 struct operacion {
     char operacion[9];
-    char cuenta;
-    char cuenta2;
+    char cuenta[3];
+    char cuenta2[3];
     int dinero;
 };
 
