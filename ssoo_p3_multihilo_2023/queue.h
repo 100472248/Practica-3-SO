@@ -14,15 +14,16 @@ struct element {
 typedef struct queue {
 	// Define the struct yourself
 	 struct element * elemento;
-//    int head = 0; // indice para el primer elemento del queue
-//    int tail = 0; // indice para el ultimo elemento del queue
-    int size;
+     int head; // indice para el primer elemento del queue
+     int tail; // indice para el ultimo elemento del queue
+     int size;
+     int n_elementos;
 }queue;
 
 queue* queue_init (int size);
 int queue_destroy (queue *q);
-int queue_put (queue *q, struct element* elem);
-struct element * queue_get(queue *q);
+int queue_put (queue *q, struct element* elem, int i);
+struct element * queue_get(queue *q, int i);
 int queue_empty (queue *q);
 int queue_full(queue *q);
 

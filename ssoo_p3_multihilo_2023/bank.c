@@ -32,6 +32,49 @@ struct operacion {
     int dinero;
 };
 
+int verifyStruct(struct operacion *clientes, int orden){
+    struct operacion cliente = clientes[orden];
+    if (strcmp(cliente.operacion, "CREAR") == 0) {
+        int cuenta = atoi(cliente.cuenta);
+        if (isdigit(cuenta) == 0) {
+            return 0;
+        }
+    }
+    if (strcmp(cliente.operacion, "INGRESAR") == 0 || strcmp(cliente.operacion, "RETIRAR") == 0) {
+        int cuenta = atoi(cliente.cuenta);
+        if (isdigit(cuenta) == 0) {
+            return 0;
+        }
+        if (isdigit(cliente.dinero) == 0) {
+            return 0;
+        }
+    }
+    if (strcmp(cliente.operacion, "TRASPASAR") == 0) {
+        int cuenta = atoi(cliente.cuenta);
+        if (isdigit(cuenta) == 0) {
+            return 0;
+        }
+        cuenta = atoi(cliente.cuenta2);
+        if (isdigit(cuenta) == 0) {
+            return 0;
+        }
+        if (isdigit(cliente.dinero) == 0) {
+            return 0;
+        }
+    }
+    if (strcmp(cliente.operacion, "SALDO") == 0) {
+        int cuenta = atoi(cliente.cuenta);
+        if ( isdigit(cuenta) == 0) {
+            return 0;
+        }
+    }
+    else {
+        return 0;
+    }
+    return 1;
+}
+
+
 int main (int argc, const char * argv[] ) {
     /*Como se tienen que meter 5 argumentos, argc debe valer 6 como mínimo.*/
     if (argc < 6){
@@ -128,44 +171,3 @@ void* trabajador(){
 pthread_exit(-1);
 }
 
-int verifyStruct(struct operacion *clientes, int orden){
-    struct operacion cliente = clientes[orden];
-    if (strcmp(cliente.operacion, "CREAR") == 0) {
-        int cuenta = atoi(cliente.cuenta);
-        if (isdigit(cuenta) == 0) {
-            return 0;
-        }
-    }
-    if (strcmp(cliente.operacion, "INGRESAR") == 0 || strcmp(cliente.operacion, "RETIRAR") == 0) {
-        int cuenta = atoi(cliente.cuenta);
-        if (isdigit(cuenta) == 0) {
-            return 0;
-        }
-        if (isdigit(cliente.dinero) == 0) {
-            return 0;
-        }
-   }
-    if (strcmp(cliente.operacion, "TRASPASAR") == 0) {
-        int cuenta = atoi(cliente.cuenta);
-        if (isdigit(cuenta) == 0) {
-            return 0;
-        }
-        cuenta = atoi(cliente.cuenta2);
-        if (isdigit(cuenta) == 0) {
-            return 0;
-        }
-        if (isdigit(cliente.dinero) == 0) {
-            return 0;
-        }
-   }
-    if (strcmp(cliente.operacion, "SALDO") == 0) {
-        int cuenta = atoi(cliente.cuenta);
-        if ( isdigit(cuenta) == 0) {
-            return 0;
-        }
-    }
-    else {
-        return 0;
-    }
-    return 1;
-}
