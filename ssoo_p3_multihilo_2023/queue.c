@@ -47,9 +47,9 @@ struct element* queue_get(queue *q) {
 
 //To check queue state
 int queue_empty(queue *q){
-    int i;
-    for (i = 0; i < size)
-	return 0;
+//    int i;
+//    for (i = 0; i < size;){}
+//	return 0;
 }
 
 int queue_full(queue *q){
