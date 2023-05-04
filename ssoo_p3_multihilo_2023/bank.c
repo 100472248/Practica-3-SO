@@ -196,11 +196,10 @@ void* cajero(){
         pthread_cond_wait(&bloqueo);
     }
 
-
-    pthread_cond_signal(&bloqueo);
-    pthread_mutex_unlock(&mut);
     client_numop ++;
     global_balance ++;
+    pthread_cond_signal(&bloqueo);
+    pthread_mutex_unlock(&mut);
     pthread_exit(-1);
 }
 
@@ -209,11 +208,10 @@ void* trabajador(){
     if (queue_empty(cola)== 1){
         pthread_cond_wait(&bloqueo);
     }
-
-    pthread_cond_signal(&bloqueo);
-    pthread_mutex_unlock(&mut);
     bank_numop ++;
     global_balance ++;
+    pthread_cond_signal(&bloqueo);
+    pthread_mutex_unlock(&mut);
     pthread_exit(-1);
 }
 

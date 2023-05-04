@@ -25,7 +25,7 @@ queue* queue_init(int size){
 int queue_put(struct queue *q, struct element* x, int i) {
     // first check capacity before puting an element
     int check_capacity = queue_full(q);
-    while (1 == check_capacity) {   // loop until queue is empty
+    while (1 == check_capacity) {   // hacer loops hasta que la queue no este llena
         check_capacity = queue_full(q);
     }
     // No merece la pena mirar si es una operacion u otra para poner los elementos
@@ -43,7 +43,7 @@ int queue_put(struct queue *q, struct element* x, int i) {
 struct element* queue_get(struct queue *q, int i) {
     int check_capacity = queue_empty(q);
     while (1 == check_capacity){
-        check_capacity = queue_empty(q); // loop until the queue has an element
+        check_capacity = queue_empty(q); // hacer loops que la queue tenga un elemento
     }
 	struct element *elemento;
 	strcpy(elemento->operacion, q->elemento[i].operacion);
@@ -81,25 +81,19 @@ int queue_destroy(struct queue *q){
 }
 
 // for testing the queue
-/*int main(){
+/*
+int main(){
 
     queue *q;
     struct element s1;
-    s1.element = 3;
+    s1.cantidad = 3;
+    strcpy(s1.cuenta1, "03");
     struct element * ptr;
     ptr = &s1;
     q = queue_init(5);
-    queue_put(q,ptr);
-    s1.element = 4;
-    queue_put(q, ptr);
-//    int i;
-//    while (0 == q->element){
-//        i ++;
-//    }
-    struct element * aux;
-    aux = q[0].element;
-
-    printf("%d\n", aux->element);*/
-
-
-
+    queue_put(q,ptr, 1);
+    s1.cantidad = 5;
+    queue_put(q, ptr, 2);
+    printf("%s\n", q->elemento[1].cuenta1);
+    return 0;
+}*/
