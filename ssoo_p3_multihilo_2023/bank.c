@@ -88,6 +88,30 @@ int verifyStruct(struct operacion *clientes, int orden){
     }
     return 1;
 }
+void* cajero(){
+    pthread_mutex_lock(&mut);
+    if (queue_full(cola)== 1){
+        pthread_cond_wait(&bloqueo);
+    }
+
+    client_numop ++;
+    global_balance ++;
+    pthread_cond_signal(&bloqueo);
+    pthread_mutex_unlock(&mut);
+    pthread_exit(-1);
+}
+
+void* trabajador(){
+    pthread_mutex_lock(&mut);
+    if (queue_empty(cola)== 1){
+        pthread_cond_wait(&bloqueo);
+    }
+    bank_numop ++;
+    global_balance ++;
+    pthread_cond_signal(&bloqueo);
+    pthread_mutex_unlock(&mut);
+    pthread_exit(-1);
+}
 
 
 int main (int argc, const char * argv[] ) {
@@ -171,17 +195,32 @@ int main (int argc, const char * argv[] ) {
         fclose(fd);
         return(-1);
     }
-    
+    // inicializar condiciones y mutex
     pthread_mutex_init(&mut, NULL);
     pthread_cond_init(&bloqueo, NULL);
+    // inicializar cola
     cola = queue_init(long_cola);
+    // numero de cajeros y trabajadores
+    int num_cajeros = atoi(argv[2]);
+    int num_trabajadores = atoi(argv[3]);
+    // crear los threads
+    pthread_t cajeros[num_cajeros], trabajadores[num_trabajadores];
+    for (int i = 0; i < num_trabajadores; i++){
+        //pthread_create(&trabajadores[i], NULL, (void * ) trabajador, NULL);
+    } // hay que cambiar los argumentos
+    for (int i = 0; i < num_cajeros; i ++){
+        //pthread_create(&cajeros[i], NULL, (void * ) cajero, NULL);
+    } // hay que cambiar los argumentos
+    // joins
+    for (int i = 0; i < num_trabajadores; i++){
+        pthread_join(trabajadores[i], NULL);
+    }
+    for (int i = 0; i < num_cajeros; i++){
+        pthread_join(cajeros[i], NULL);
+    }
 
-    pthread_t cajeros[argv[2]], trabajadores[argv[3]];
 
-
-
-
-
+    // destruir condiciones y mutex
     pthread_cond_destroy(&bloqueo, NULL);
     pthread_mutex_destroy(&mut, NULL);
     queue_destroy(cola);
@@ -190,28 +229,4 @@ int main (int argc, const char * argv[] ) {
     return 0;
 }
 
-void* cajero(){
-    pthread_mutex_lock(&mut);
-    if (queue_full(cola)== 1){
-        pthread_cond_wait(&bloqueo);
-    }
-
-    client_numop ++;
-    global_balance ++;
-    pthread_cond_signal(&bloqueo);
-    pthread_mutex_unlock(&mut);
-    pthread_exit(-1);
-}
-
-void* trabajador(){
-    pthread_mutex_lock(&mut);
-    if (queue_empty(cola)== 1){
-        pthread_cond_wait(&bloqueo);
-    }
-    bank_numop ++;
-    global_balance ++;
-    pthread_cond_signal(&bloqueo);
-    pthread_mutex_unlock(&mut);
-    pthread_exit(-1);
-}
 
