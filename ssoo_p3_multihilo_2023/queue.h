@@ -10,12 +10,14 @@ struct element {
     int cantidad; // cantidad a depositar
 
 };
+int lista [];
 
 typedef struct queue {
 	// Define the struct yourself
-	element elemento[size] // elemento
+	element * elemento;
     int head = 0; // indice para el primer elemento del queue
     int tail = 0; // indice para el ultimo elemento del queue
+    int size;
 }queue;
 
 queue* queue_init (int size);

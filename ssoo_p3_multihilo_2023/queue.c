@@ -11,7 +11,12 @@
 //To create a queue
 queue* queue_init(int size){
 
-	queue * q = (queue *)malloc(size * sizeof(queue));
+    queue *q = (queue *)malloc(sizeof(queue));
+    q->elemento = (element *)malloc(size * sizeof(element));
+    q->tail = size;
+    q->size = size;
+
+
 
 	return q;
 }
@@ -42,12 +47,15 @@ struct element* queue_get(queue *q) {
 
 //To check queue state
 int queue_empty(queue *q){
-
+    int i;
+    for (i = 0; i < size)
 	return 0;
 }
 
 int queue_full(queue *q){
+    for (int index = 0; index < q.size; index++){
 
+    }
 	return 0;
 }
 
