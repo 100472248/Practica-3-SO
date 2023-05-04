@@ -38,27 +38,28 @@ int main (int argc, const char * argv[] ) {
         return -1;
     }
     /*Antes de empezar, vamos a comprobar que todo funciona correctamente.*/
-    if ((atoi(argv[3]) < 0) || (atoi(argv[4]) < 0)) {
+    if ((atoi(argv[2]) < 0) || (atoi(argv[3]) < 0)) {
         printf("Número de hilos negativo.\n");
         return -1;
     }
-    if (atoi(argv[5]) < 1){
+    if (atoi(argv[4]) < 1){
         printf("Número de cuentas máximo no positivo.\n");
         return -1;
     }
-    if (atoi(argv[6]) < 1){
+    if (atoi(argv[5]) < 1){
         printf("Longitud de cola imposible.\n");
         return -1;
     }
     /*next_op para escanear cadenas y cantidad para escanear cantidades de dinero*/
     int max_op, cantidad;
+    in
     char next_op[9];
     FILE *fd;
     /*Para diferenciar la lectura del max_op frente el resto de operaciones, marcamos num_operacion como -1 y lo pasamos a 0 cuando se
     realice esta operación.*/
     int num_operacion = -1;
     operacion *list_num_ops[] = (operacion*)malloc(sizeof(operacion) * 200);
-    fd = fopen(argv[2], O_RDONLY, 0644);
+    fd = fopen(argv[1], O_RDONLY, 0644);
     /*Como es un bucle con malloc, hemos decidido utilizar una variable soporte. Cuando no lea operaciones o haya una incorrecta, se termina.*/
     int fin = 1;
     while (fin == 1){
@@ -97,7 +98,7 @@ int main (int argc, const char * argv[] ) {
         if verifyStruct(list_num_ops, num_operacion) == True {
             num_operacion ++;}
     }
-    /*SE analiza si max_op es correcta.*/
+    /*Se analiza si max_op es correcta.*/
     if (max_op > 200){
         printf("Error. Se exceden las 200 operaciones.\n");
         free(*list_num_ops);
