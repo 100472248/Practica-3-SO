@@ -23,8 +23,22 @@
  * @return
  */
 
+
+/*Se inicializan las variables globales*/
 int client_numop = 0, bank_numop = 0, global_balance = 0;
+
+/*Se crea una lista global donde se guarda el dinero de cada cuenta. Tiene longitud igual al máximo de cuentas (argv[4]).
+Para indicar que la cuenta no existe, le ponemos de valor -1. Inicialmente, no hasy ninguna cuenta creada (todos -1).*/
+int lista_cuentas[argv[4]];
+for(int i; i < argv[4]; i ++){
+    lista_cuentas[i] = -1;
+}
+/*Se crea la cola, el mutex y su condición.*/
+queue_t cola;
 pthread_mutex_t mut;
+pthread_cond_t bloqueo;
+
+/*Para inidicar los datos de cada operación, se ha creado este struct.*/
 struct operacion {
     char operacion[9];
     char cuenta[3];
@@ -33,16 +47,17 @@ struct operacion {
 };
 
 int verifyStruct(struct operacion *clientes, int orden){
+    /*Para analizar si cada valor del struct cumple las condiciones dadas en el enunciado.*/
     struct operacion cliente = clientes[orden];
     if (strcmp(cliente.operacion, "CREAR") == 0) {
         int cuenta = atoi(cliente.cuenta);
-        if (isdigit(cuenta) == 0) {
+        if  ((isdigit(cuenta) == 0) || (cuenta > argv[4])) {
             return 0;
         }
     }
     if (strcmp(cliente.operacion, "INGRESAR") == 0 || strcmp(cliente.operacion, "RETIRAR") == 0) {
         int cuenta = atoi(cliente.cuenta);
-        if (isdigit(cuenta) == 0) {
+        if ((isdigit(cuenta) == 0) || (cuenta > argv[4])) {
             return 0;
         }
         if (isdigit(cliente.dinero) == 0) {
@@ -51,11 +66,11 @@ int verifyStruct(struct operacion *clientes, int orden){
     }
     if (strcmp(cliente.operacion, "TRASPASAR") == 0) {
         int cuenta = atoi(cliente.cuenta);
-        if (isdigit(cuenta) == 0) {
+        if  ((isdigit(cuenta) == 0) || (cuenta > argv[4])) {
             return 0;
         }
         cuenta = atoi(cliente.cuenta2);
-        if (isdigit(cuenta) == 0) {
+        if  ((isdigit(cuenta) == 0) || (cuenta > argv[4])){
             return 0;
         }
         if (isdigit(cliente.dinero) == 0) {
@@ -64,7 +79,7 @@ int verifyStruct(struct operacion *clientes, int orden){
     }
     if (strcmp(cliente.operacion, "SALDO") == 0) {
         int cuenta = atoi(cliente.cuenta);
-        if ( isdigit(cuenta) == 0) {
+        if  ((isdigit(cuenta) == 0) || (cuenta > argv[4])) {
             return 0;
         }
     }
@@ -156,18 +171,49 @@ int main (int argc, const char * argv[] ) {
         fclose(fd);
         return(-1);
     }
+    
+    pthread_mutex_init(&mut, NULL);
+    pthread_cond_init(&bloqueo, NULL);
+    cola = queue_init(long_cola);
+
+    pthread_t cajeros[argv[2]], trabajadores[argv[3]];
+
+
+
+
+
+    pthread_cond_destroy(&bloqueo, NULL);
+    pthread_mutex_destroy(&mut, NULL);
+    queue_destroy(cola);
     free(list_num_ops);
     fclose(fd);
     return 0;
 }
 
 void* cajero(){
+    pthread_mutex_lock(&mut);
+    if (queue_full(cola)== 1){
+        pthread_cond_wait(&bloqueo);
+    }
 
-pthread_exit(-1);
+
+    pthread_cond_signal(&bloqueo);
+    pthread_mutex_unlock(&mut);
+    client_numop ++;
+    global_balance ++;
+    pthread_exit(-1);
 }
 
 void* trabajador(){
+    pthread_mutex_lock(&mut);
+    if (queue_empty(cola)== 1){
+        pthread_cond_wait(&bloqueo);
+    }
 
-pthread_exit(-1);
+    pthread_cond_signal(&bloqueo);
+    pthread_mutex_unlock(&mut);
+    bank_numop ++;
+    global_balance ++;
+    pthread_exit(-1);
 }
 
