@@ -13,7 +13,7 @@ struct element {
 
 typedef struct queue {
 	// Define the struct yourself
-	element* elemento // elemento
+	element elemento[size] // elemento
     int head = 0; // indice para el primer elemento del queue
     int tail = 0; // indice para el ultimo elemento del queue
 }queue;
