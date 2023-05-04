@@ -52,7 +52,7 @@ int main (int argc, const char * argv[] ) {
     }
     /*next_op para escanear cadenas y cantidad para escanear cantidades de dinero*/
     int max_op, cantidad;
-    in
+    int long_cola = argv[5];
     char next_op[9];
     FILE *fd;
     /*Para diferenciar la lectura del max_op frente el resto de operaciones, marcamos num_operacion como -1 y lo pasamos a 0 cuando se
