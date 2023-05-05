@@ -17,6 +17,10 @@ queue* queue_init(int size){
     q->tail = size;
     q->size = size;
     q->n_elementos = 0;
+    // Ponemos el numero de operacion a 0 para indicar que eso significa que no existe la operacion aun
+    for (int i = 0; i < q->size; i++) {
+        q->elemento[i].num_operacion = 0;
+    }
 	return q;
 }
 
@@ -52,6 +56,7 @@ int queue_put(struct queue *q, struct element* x) {
 
 // To Dequeue an element.
 struct element* queue_get(struct queue *q) {
+    int j;
     int check_capacity = queue_empty(q);
     while (1 == check_capacity){
         check_capacity = queue_empty(q); // hacer loops que la queue tenga un elemento
@@ -59,15 +64,16 @@ struct element* queue_get(struct queue *q) {
     // Buscamos el primer elemento lleno de la cola
     for (int i = 0; i < q->size; i++) {
         if (q->elemento[i].num_operacion != 0) {
+            j = i;
             break;
         }
     }
 	struct element *elemento;
-    elemento->num_operacion = q->elemento[i].num_operacion;
-	strcpy(elemento->operacion, q->elemento[i].operacion);
-    strcpy(elemento->cuenta1, q->elemento[i].cuenta1);
-    strcpy(elemento->cuenta2, q->elemento[i].cuenta2);
-    elemento->cantidad = q->elemento[i].cantidad;
+    elemento->num_operacion = q->elemento[j].num_operacion;
+	strcpy(elemento->operacion, q->elemento[j].operacion);
+    strcpy(elemento->cuenta1, q->elemento[j].cuenta1);
+    strcpy(elemento->cuenta2, q->elemento[j].cuenta2);
+    elemento->cantidad = q->elemento[j].cantidad;
     q->n_elementos--;
 	return elemento; // return element
 }
@@ -91,7 +97,7 @@ int queue_full(struct queue *q){
 //To destroy the queue and free the resources
 int queue_destroy(struct queue *q){
     for (int i = 0; i < q->size; i++) {
-        queue_get(q, i);
+        queue_get(q);
     }
     free(q->elemento);
     free(q);
