@@ -255,6 +255,7 @@ int main (int argc, const char * argv[] ) {
     pthread_cond_destroy(&vacio);
     pthread_mutex_destroy(&mut);
     queue_destroy(buffer);
+    free(lista_cuentas);
     free(list_client_ops);
     return 0;
 }
