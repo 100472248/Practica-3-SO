@@ -22,30 +22,48 @@ queue* queue_init(int size){
 
 
 // To Enqueue an element
-int queue_put(struct queue *q, struct element* x, int i) {
+int queue_put(struct queue *q, struct element* x) {
     // first check capacity before puting an element
+    int j = 0;
     int check_capacity = queue_full(q);
     while (1 == check_capacity) {   // hacer loops hasta que la queue no este llena
         check_capacity = queue_full(q);
     }
+    // Ponemos el elemento en la primera casilla despues del elemento mas avanzado en la cola
+    for (int i = q->size; i > 0; i--) {
+        if (q->elemento[i].num_operacion != 0) {
+            if (i != q->size) {
+                j = i + 1;
+            }
+            break;
+        }
+    }
     // No merece la pena mirar si es una operacion u otra para poner los elementos
     // ya que de igual forma los que no existan por como es la operacion van a ser NULL
-    strcpy(q->elemento[i].operacion, x->operacion);
-    strcpy(q->elemento[i].cuenta1, x->cuenta1);
-    strcpy(q->elemento[i].cuenta2, x->cuenta2);
-    q->elemento[i].cantidad = x->cantidad;
+    q->elemento[j].num_operacion = x->num_operacion;
+    strcpy(q->elemento[j].operacion, x->operacion);
+    strcpy(q->elemento[j].cuenta1, x->cuenta1);
+    strcpy(q->elemento[j].cuenta2, x->cuenta2);
+    q->elemento[j].cantidad = x->cantidad;
     q->n_elementos++;
 	return 0;
 }
 
 
 // To Dequeue an element.
-struct element* queue_get(struct queue *q, int i) {
+struct element* queue_get(struct queue *q) {
     int check_capacity = queue_empty(q);
     while (1 == check_capacity){
         check_capacity = queue_empty(q); // hacer loops que la queue tenga un elemento
     }
+    // Buscamos el primer elemento lleno de la cola
+    for (int i = 0; i < q->size; i++) {
+        if (q->elemento[i].num_operacion != 0) {
+            break;
+        }
+    }
 	struct element *elemento;
+    elemento->num_operacion = q->elemento[i].num_operacion;
 	strcpy(elemento->operacion, q->elemento[i].operacion);
     strcpy(elemento->cuenta1, q->elemento[i].cuenta1);
     strcpy(elemento->cuenta2, q->elemento[i].cuenta2);

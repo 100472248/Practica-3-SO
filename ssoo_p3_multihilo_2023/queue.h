@@ -4,6 +4,7 @@
 
 struct element {
 	// Define the struct yourself
+    int num_operacion = 0; // numero de operacion, si no existe aun sera 0
 	char operacion [9]; // nombre de la operacion
     char cuenta1[3]; // numero de cuenta
     char cuenta2[3]; // segunda cuenta
@@ -22,8 +23,8 @@ typedef struct queue {
 
 queue* queue_init (int size);
 int queue_destroy (queue *q);
-int queue_put (queue *q, struct element* elem, int i);
-struct element * queue_get(queue *q, int i);
+int queue_put (queue *q, struct element* elem);
+struct element * queue_get(queue *q);
 int queue_empty (queue *q);
 int queue_full(queue *q);
 
