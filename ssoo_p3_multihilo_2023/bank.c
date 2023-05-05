@@ -233,7 +233,7 @@ int main (int argc, const char * argv[] ) {
     /*Se crea una lista global donde se guarda el dinero de cada cuenta. Tiene longitud igual al máximo de cuentas (argv[4]).
     Para indicar que la cuenta no existe, le ponemos de valor -1. Inicialmente, no hasy ninguna cuenta creada (todos -1).*/
     lista_cuentas = (int*) malloc(max_cuentas * sizeof(int));
-    for(int i; i < max_cuentas; i ++){
+    for(int i = 0; i < max_cuentas; i ++){
         lista_cuentas[i] = -1;
     }
     // numero de cajeros y trabajadores
