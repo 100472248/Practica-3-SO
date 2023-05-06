@@ -181,30 +181,30 @@ int main (int argc, const char * argv[] ) {
             fscanf(fd, "%d", &max_op);
             num_operacion++;
         }
-        fscanf(fd, "%s", next_op);
-        strcpy(list_client_ops[num_operacion].operacion, next_op);
-        if (strcmp(next_op, "CREAR") == 0){
-            fscanf(fd, "%s", next_op);
-            strcpy(list_client_ops[num_operacion].cuenta, next_op);
+        fscanf(fd, "%s", &&next_op);
+        strcpy(list_client_ops[num_operacion].operacion, &next_op);
+        if (strcmp(&next_op, "CREAR") == 0){
+            fscanf(fd, "%s", &next_op);
+            strcpy(list_client_ops[num_operacion].cuenta, &next_op);
             list_client_ops[num_operacion].dinero = 0;
         }
-        else if (strcmp(next_op, "INGRESAR") == 0 || strcmp(next_op, "RETIRAR") == 0 ){
-            fscanf(fd, "%s", next_op);
-            strcpy(list_client_ops[num_operacion].cuenta, next_op);
+        else if (strcmp(&next_op, "INGRESAR") == 0 || strcmp(&next_op, "RETIRAR") == 0 ){
+            fscanf(fd, "%s", &next_op);
+            strcpy(list_client_ops[num_operacion].cuenta, &next_op);
             fscanf(fd, "%d", &cantidad);
             list_client_ops[num_operacion].dinero = cantidad;
         }
-        else if (strcmp(next_op, "TRASPASAR") == 0) {
-            fscanf(fd, "%s", next_op);
-            strcpy(list_client_ops[num_operacion].cuenta, next_op);
-            fscanf(fd, "%s", next_op);
-            strcpy(list_client_ops[num_operacion].cuenta2, next_op);
+        else if (strcmp(&next_op, "TRASPASAR") == 0) {
+            fscanf(fd, "%s", &next_op);
+            strcpy(list_client_ops[num_operacion].cuenta, &next_op);
+            fscanf(fd, "%s", &next_op);
+            strcpy(list_client_ops[num_operacion].cuenta2, &next_op);
             fscanf(fd, "%d", &cantidad);
             list_client_ops[num_operacion].dinero = cantidad;
         }
-        else if (strcmp(next_op, "SALDO") == 0) {
-            fscanf(fd, "%s", next_op);
-            strcpy(list_client_ops[num_operacion].cuenta, next_op);
+        else if (strcmp(&next_op, "SALDO") == 0) {
+            fscanf(fd, "%s", &next_op);
+            strcpy(list_client_ops[num_operacion].cuenta, &next_op);
         }
         else {
             fin = 0;}
