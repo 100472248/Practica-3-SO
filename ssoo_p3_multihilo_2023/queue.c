@@ -41,7 +41,7 @@ int queue_put(struct queue *q, struct element* x) {
             }
             else {
                 j = 0;
-                break
+                break;
             }
         }
     }
