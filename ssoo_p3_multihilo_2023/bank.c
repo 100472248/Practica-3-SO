@@ -167,7 +167,7 @@ int main (int argc, const char * argv[] ) {
     /*next_op para escanear cadenas y cantidad para escanear cantidades de dinero*/
     int cantidad;
     int long_cola = atoi(argv[5]);
-    char next_op[9];
+    char *next_op = (char*) malloc(9 * sizeof(char));
     FILE *fd;
     /*Para diferenciar la lectura del max_op frente el resto de operaciones, marcamos num_operacion como -1 y lo pasamos a 0 cuando se
     realice esta operación.*/
@@ -213,6 +213,7 @@ int main (int argc, const char * argv[] ) {
             num_operacion ++; }
     }
     fclose(fd);
+    free(next_op);
     /*Se analiza si max_op es correcta.*/
     if (max_op > 200){
         printf("Error. Se exceden las 200 operaciones.\n");
