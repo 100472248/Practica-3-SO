@@ -10,7 +10,6 @@
 
 //To create a queue
 queue* queue_init(int size){
-
     struct queue *q = (struct queue *)malloc(sizeof(struct queue));
     q->elemento = (struct element *)malloc(size * sizeof(struct element));
     q->head = 0;
@@ -38,8 +37,9 @@ int queue_put(struct queue *q, struct element* x) {
         if (q->elemento[i].num_operacion != 0) {
             if (i != q->size - 1) {
                 j = i + 1;
+                break;
             }
-            break;
+            j = 0;
         }
     }
     // No merece la pena mirar si es una operacion u otra para poner los elementos
@@ -56,7 +56,7 @@ int queue_put(struct queue *q, struct element* x) {
 
 // To Dequeue an element.
 struct element* queue_get(struct queue *q) {
-    int j;
+    int j = 0;
     int check_capacity = queue_empty(q);
     while (1 == check_capacity){
         check_capacity = queue_empty(q); // hacer loops que la queue tenga un elemento
