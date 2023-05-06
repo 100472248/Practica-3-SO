@@ -208,7 +208,7 @@ int main (int argc, const char * argv[] ) {
         }
         else {
             fin = 0;}
-            
+
         if (verifyStruct(list_client_ops, num_operacion) == 1) {
             num_operacion ++; }
     }
@@ -232,8 +232,8 @@ int main (int argc, const char * argv[] ) {
     buffer = queue_init(long_cola);
     /*Se crea una lista global donde se guarda el dinero de cada cuenta. Tiene longitud igual al máximo de cuentas (argv[5]).
     Para indicar que la cuenta no existe, le ponemos de valor -1. Inicialmente, no hay ninguna cuenta creada (todos -1).*/
-    lista_cuentas = (int*) malloc(max_cuentas * sizeof(int));
-    for(int i = 0; i < max_cuentas; i++){
+    lista_cuentas = (int*)malloc((max_cuentas+1) * sizeof(int));
+    for(int i = 0; i < max_cuentas + 1; i++){
         lista_cuentas[i] = -1;
     }
     // numero de cajeros y trabajadores
