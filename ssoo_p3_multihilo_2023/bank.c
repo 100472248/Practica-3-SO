@@ -151,22 +151,22 @@ int main (int argc, const char * argv[] ) {
         return -1;
     }
     /*Antes de empezar, vamos a comprobar que todo funciona correctamente.*/
-    if ((atoi(argv[3]) < 0) || (atoi(argv[4]) < 0)) {
+    if ((atoi(argv[2]) < 0) || (atoi(argv[3]) < 0)) {
         printf("Número de hilos negativo.\n");
         return -1;
     }
-    if (atoi(argv[5]) < 1){
+    if (atoi(argv[4]) < 1){
         printf("Número de cuentas máximo no positivo.\n");
         return -1;
     }
-    if (atoi(argv[6]) < 1){
+    if (atoi(argv[5]) < 1){
         printf("Longitud de cola imposible.\n");
         return -1;
     }
-    max_cuentas = atoi(argv[5]);
+    max_cuentas = atoi(argv[4]);
     /*next_op para escanear cadenas y cantidad para escanear cantidades de dinero*/
     int cantidad;
-    int long_cola = atoi(argv[6]);
+    int long_cola = atoi(argv[5]);
     char next_op[9];
     FILE *fd;
     /*Para diferenciar la lectura del max_op frente el resto de operaciones, marcamos num_operacion como -1 y lo pasamos a 0 cuando se
@@ -237,8 +237,8 @@ int main (int argc, const char * argv[] ) {
         lista_cuentas[i] = -1;
     }
     // numero de cajeros y trabajadores
-    int num_cajeros = atoi(argv[3]);
-    int num_trabajadores = atoi(argv[4]);
+    int num_cajeros = atoi(argv[2]);
+    int num_trabajadores = atoi(argv[3]);
     // crear los threads
     pthread_t cajeros[num_cajeros], trabajadores[num_trabajadores];
     for (int i = 0; i < num_trabajadores; i++) {
