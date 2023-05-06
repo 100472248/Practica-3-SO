@@ -39,7 +39,10 @@ int queue_put(struct queue *q, struct element* x) {
                 j = i + 1;
                 break;
             }
-            j = 0;
+            else {
+                j = 0;
+                break
+            }
         }
     }
     // No merece la pena mirar si es una operacion u otra para poner los elementos
