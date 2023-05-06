@@ -179,7 +179,7 @@ int main (int argc, const char * argv[] ) {
     while (fin == 1){
         if (num_operacion == -1) {
             fscanf(fd, "%d", &max_op);
-            num_operacion ++;
+            num_operacion++;
         }
         fscanf(fd, "%s", next_op);
         strcpy(list_client_ops[num_operacion].operacion, next_op);
@@ -230,10 +230,10 @@ int main (int argc, const char * argv[] ) {
     pthread_cond_init(&vacio, NULL);
     // inicializar cola
     buffer = queue_init(long_cola);
-    /*Se crea una lista global donde se guarda el dinero de cada cuenta. Tiene longitud igual al máximo de cuentas (argv[4]).
-    Para indicar que la cuenta no existe, le ponemos de valor -1. Inicialmente, no hasy ninguna cuenta creada (todos -1).*/
+    /*Se crea una lista global donde se guarda el dinero de cada cuenta. Tiene longitud igual al máximo de cuentas (argv[5]).
+    Para indicar que la cuenta no existe, le ponemos de valor -1. Inicialmente, no hay ninguna cuenta creada (todos -1).*/
     lista_cuentas = (int*) malloc(max_cuentas * sizeof(int));
-    for(int i = 0; i < max_cuentas; i ++){
+    for(int i = 0; i < max_cuentas; i++){
         lista_cuentas[i] = -1;
     }
     // numero de cajeros y trabajadores

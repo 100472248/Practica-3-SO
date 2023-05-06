@@ -34,9 +34,9 @@ int queue_put(struct queue *q, struct element* x) {
         check_capacity = queue_full(q);
     }
     // Ponemos el elemento en la primera casilla despues del elemento mas avanzado en la cola
-    for (int i = q->size; i > 0; i--) {
+    for (int i = q->size - 1; i >= 0; i--) {
         if (q->elemento[i].num_operacion != 0) {
-            if (i != q->size) {
+            if (i != q->size - 1) {
                 j = i + 1;
             }
             break;
@@ -96,9 +96,6 @@ int queue_full(struct queue *q){
 
 //To destroy the queue and free the resources
 int queue_destroy(struct queue *q){
-    for (int i = 0; i < q->size; i++) {
-        queue_get(q);
-    }
     free(q->elemento);
     free(q);
 	return 0;
