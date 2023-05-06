@@ -86,7 +86,7 @@ int verifyStruct(struct operacion *clientes, int orden){
 
 void * cajero(struct operacion *lista_ops){
     struct element elemento;
-    for (int i = 0; i < max_op; i++) {
+    while (client_numop < max_op) {
         pthread_mutex_lock(&mut);
         while (queue_full(buffer) == 1) {
             pthread_cond_wait(&lleno, &mut);
@@ -106,7 +106,7 @@ void * cajero(struct operacion *lista_ops){
 
 void * trabajador() {
     struct element *elemento;
-    for (int i = 0; i < max_op; i++) {
+    while (bank_numop < max_op) {
         pthread_mutex_lock(&mut);
         while (queue_empty(buffer)== 1) {
             pthread_cond_wait(&vacio, &mut);
