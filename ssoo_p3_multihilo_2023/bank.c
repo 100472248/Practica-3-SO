@@ -25,7 +25,7 @@
 
 
 /*Se inicializan las variables globales*/
-int client_numop = 0, bank_numop = 0, global_balance = 0, max_op = 0, max_cuentas = 0, num_operacion = -1;
+int client_numop = 0, bank_numop = 0, global_balance = 0, max_op = 0, max_cuentas = 0;
 // Se crea una lista global donde se guarda el dinero de cada cuenta.
 int *lista_cuentas;
 /*Se crea la cola, el mutex y su condición.*/
@@ -35,80 +35,48 @@ pthread_cond_t lleno, vacio;
 
 /*Para inidicar los datos de cada operación, se ha creado este struct.*/
 struct operacion {
-    char operacion[9];
+    char operacion[10];
     char cuenta[3];
     char cuenta2[3];
     int dinero;
 };
 
-int verifyStruct(struct operacion cliente, int orden){
+int verifyStruct(struct operacion *clientes, int orden){
     // Para analizar si cada valor del struct cumple las condiciones dadas en el enunciado.
-    if (strcmp(cliente.operacion, "CREAR") == 0 || strcmp(cliente.operacion, "INGRESAR") == 0 || strcmp(cliente.operacion, "RETIRAR") == 0 || strcmp(cliente.operacion, "TRASPASAR") == 0 || strcmp(cliente.operacion, "SALDO") == 0){
-        int cuenta1 = atoi(cliente.cuenta);
-        if (cuenta1 > max_cuentas) {
+    struct operacion cliente = clientes[orden];
+    int cuenta = 0;
+    if (strcmp(cliente.operacion, "CREAR") == 0) {
+        cuenta = atoi(cliente.cuenta);
+        if  (cuenta > max_cuentas) {
             return 0;
         }
-        if (strcmp(cliente.operacion, "TRASPASAR")){
-            int cuenta2 = atoi(cliente.cuenta2);
-            if (cuenta2 > max_cuentas){
-                return 0;
-            }
-        }
-        return 1;
     }
-    return 0;
-}
-
-struct operacion *lectura(struct operacion *lista, FILE* fd) {
-    int cantidad;
-    char next_op[9];
-    char str_cuenta1[3];
-    char str_cuenta2[3];
-    char linea[80];
-    /*Como es un bucle con malloc, hemos decidido utilizar una variable soporte. Cuando no lea operaciones o haya una incorrecta, se termina.*/
-    int fin = 1;
-    while (fin == 1){
-        if (num_operacion == -1) {
-            fgets(linea, sizeof(linea), fd);
-            max_op = atoi(linea);
-            printf("%d\n", max_op);
-            num_operacion++;
+    if (strcmp(cliente.operacion, "INGRESAR") == 0 || strcmp(cliente.operacion, "RETIRAR") == 0) {
+        cuenta = atoi(cliente.cuenta);
+        if (cuenta > max_cuentas) {
+            return 0;
         }
-        if (fgets(linea, sizeof(linea), fd) == NULL){
-            printf("%s\n", linea);
-            return lista;
-        }
-        sscanf(linea, "%s", next_op);
-        if (strcmp(next_op, "CREAR") == 0){
-            sscanf(linea, "%s %s", next_op, str_cuenta1);
-            strcpy(lista[num_operacion].operacion, next_op);
-            strcpy(lista[num_operacion].cuenta, str_cuenta1);
-        }
-        else if (strcmp(next_op, "INGRESAR") == 0 || strcmp(next_op, "RETIRAR") == 0 ){
-            sscanf(linea, "%s %s %d", next_op, str_cuenta1, &cantidad);
-            strcpy(lista[num_operacion].operacion, next_op);
-            strcpy(lista[num_operacion].cuenta, str_cuenta1);
-            lista[num_operacion].dinero = cantidad;
-        }
-        else if (strcmp(next_op, "TRASPASAR") == 0) {
-            sscanf(linea, "%s %s %s %d", next_op, str_cuenta1, str_cuenta2, &cantidad);
-            strcpy(lista[num_operacion].operacion, next_op);
-            strcpy(lista[num_operacion].cuenta, str_cuenta1);
-            strcpy(lista[num_operacion].cuenta2, str_cuenta2);
-            lista[num_operacion].dinero = cantidad;
-        }
-        else if (strcmp(next_op, "SALDO") == 0) {
-            sscanf(linea, "%s %s", next_op, str_cuenta1);
-            strcpy(lista[num_operacion].operacion, next_op);
-            strcpy(lista[num_operacion].cuenta, str_cuenta1);
-        }
-        printf("Orden: %s, cuenta1: %s\n", lista[num_operacion].operacion, lista[num_operacion].cuenta);
-        if (verifyStruct(lista[num_operacion], num_operacion) == 1) {
-            num_operacion ++;
-            }
-        printf("%d\n", num_operacion);
     }
-       
+    if (strcmp(cliente.operacion, "TRASPASAR") == 0) {
+        cuenta = atoi(cliente.cuenta);
+        if  (cuenta > max_cuentas) {
+            return 0;
+        }
+        cuenta = atoi(cliente.cuenta2);
+        if (cuenta > max_cuentas) {
+            return 0;
+        }
+    }
+    if (strcmp(cliente.operacion, "SALDO") == 0) {
+        cuenta = atoi(cliente.cuenta);
+        if  (cuenta > max_cuentas) {
+            return 0;
+        }
+    }
+    else {
+        return 0;
+    }
+    return 1;
 }
 
 void * cajero(struct operacion *lista_ops){
@@ -143,25 +111,26 @@ void * trabajador() {
         // ¿Que pasa si hay un numero de cuenta mayor al numero maximo de cuentas?
         if (strcmp(elemento->operacion, "CREAR") == 0) {
             lista_cuentas[atoi(elemento->cuenta1)] = 0;
-            printf("%d CREAR %s SALDO=0 TOTAL=%d", elemento->num_operacion, elemento->cuenta1, global_balance);
+            printf("%d CREAR %s SALDO=0 TOTAL=%d\n", elemento->num_operacion, elemento->cuenta1, global_balance);
         }
         else if (strcmp(elemento->operacion, "INGRESAR") == 0) {
             lista_cuentas[atoi(elemento->cuenta1)] += elemento->cantidad;
             global_balance += elemento->cantidad;
-            printf("%d INGRESAR %s %d SALDO=%d TOTAL=%d", elemento->num_operacion, elemento->cuenta1, elemento->cantidad, lista_cuentas[atoi(elemento->cuenta1)], global_balance);
+            printf("%d INGRESAR %s %d SALDO=%d TOTAL=%d\n", elemento->num_operacion, elemento->cuenta1, elemento->cantidad, lista_cuentas[atoi(elemento->cuenta1)], global_balance);
         }
         else if (strcmp(elemento->operacion, "RETIRAR") == 0) {
             lista_cuentas[atoi(elemento->cuenta1)] -= elemento->cantidad;
             global_balance -= elemento->cantidad;
-            printf("%d RETIRAR %s %d SALDO=%d TOTAL=%d", elemento->num_operacion, elemento->cuenta1, elemento->cantidad, lista_cuentas[atoi(elemento->cuenta1)], global_balance);
+            printf("%d RETIRAR %s %d SALDO=%d TOTAL=%d\n", elemento->num_operacion, elemento->cuenta1, elemento->cantidad, lista_cuentas[atoi(elemento->cuenta1)], global_balance);
         }
         else if (strcmp(elemento->operacion, "TRASPASAR") == 0) {
             lista_cuentas[atoi(elemento->cuenta1)] -= elemento->cantidad;
             lista_cuentas[atoi(elemento->cuenta2)] += elemento->cantidad;
-            printf("%d TRASPASAR %s %s %d SALDO=%d TOTAL=%d", elemento->num_operacion, elemento->cuenta1, elemento->cuenta2, elemento->cantidad, lista_cuentas[atoi(elemento->cuenta2)], global_balance);
+            printf("%d TRASPASAR %s %s %d SALDO=%d TOTAL=%d\n", elemento->num_operacion, elemento->cuenta1, elemento->cuenta2, elemento->cantidad, lista_cuentas[atoi(elemento->cuenta2)], global_balance);
         }
-        /*else {
-            printf("%d SALDO %s SALDO=%d TOTAL=%d", elemento->num_operacion, elemento->cuenta1, lista_cuentas[atoi(elemento->cuenta1)], global_balance);}*/
+        else {
+            printf("%d SALDO %s SALDO=%d TOTAL=%d\n", elemento->num_operacion, elemento->cuenta1, lista_cuentas[atoi(elemento->cuenta1)], global_balance);
+        }
         elemento->num_operacion = 0;
         pthread_cond_signal(&lleno);
         pthread_mutex_unlock(&mut);
@@ -190,20 +159,64 @@ int main (int argc, const char * argv[] ) {
         return -1;
     }
     max_cuentas = atoi(argv[4]);
-    struct operacion *list_client_ops = (struct operacion*)malloc(sizeof(struct operacion) * 200);
-    FILE *fd;
-    fd = fopen(argv[1], "r");
-    list_client_ops = lectura(list_client_ops, fd);
-    fclose(fd);
     /*next_op para escanear cadenas y cantidad para escanear cantidades de dinero*/
+    int cantidad;
     int long_cola = atoi(argv[5]);
+    char next_op[10];
+    FILE *fd;
+    /*Para diferenciar la lectura del max_op frente el resto de operaciones, marcamos num_operacion como -1 y lo pasamos a 0 cuando se
+    realice esta operación.*/
+    int num_operacion = -1;
+    struct operacion *list_client_ops = (struct operacion*)malloc(sizeof(struct operacion) * 200);
+    fd = fopen(argv[1], "r");
+    /*Como es un bucle con malloc, hemos decidido utilizar una variable soporte. Cuando no lea operaciones o haya una incorrecta, se termina.*/
+    while (feof(fd) == 0){
+        if (num_operacion == -1) {
+            fscanf(fd, "%d", &max_op);
+            num_operacion++;
+        }
+        fscanf(fd, "%s", next_op);
+        if (strcmp(next_op, "CREAR") == 0){
+            strcpy(list_client_ops[num_operacion].operacion, next_op);
+            fscanf(fd, "%s", next_op);
+            strcpy(list_client_ops[num_operacion].cuenta, next_op);
+        }
+        else if (strcmp(next_op, "INGRESAR") == 0 || strcmp(next_op, "RETIRAR") == 0 ){
+            strcpy(list_client_ops[num_operacion].operacion, next_op);
+            fscanf(fd, "%s", next_op);
+            strcpy(list_client_ops[num_operacion].cuenta, next_op);
+            fscanf(fd, "%d", &cantidad);
+            list_client_ops[num_operacion].dinero = cantidad;
+        }
+        else if (strcmp(next_op, "TRASPASAR") == 0) {
+            printf("Operacion traspasar %s\n", next_op);
+            strcpy(list_client_ops[num_operacion].operacion, next_op);
+            printf("list_client_ops %s\n", list_client_ops[num_operacion].operacion);
+            fscanf(fd, "%s", next_op);
+            printf("Operacion traspasar %s\n", next_op);
+            strcpy(list_client_ops[num_operacion].cuenta, next_op);
+            fscanf(fd, "%s", next_op);
+            printf("Operacion traspasar %s\n", next_op);
+            strcpy(list_client_ops[num_operacion].cuenta2, next_op);
+            fscanf(fd, "%d", &cantidad);
+            printf("Operacion traspasar %d\n", cantidad);
+            list_client_ops[num_operacion].dinero = cantidad;
+        }
+        else if (strcmp(next_op, "SALDO") == 0) {
+            strcpy(list_client_ops[num_operacion].operacion, next_op);
+            fscanf(fd, "%s", next_op);
+            strcpy(list_client_ops[num_operacion].cuenta, next_op);
+        }
+        num_operacion ++;
+    }
+    fclose(fd);
     /*Se analiza si max_op es correcta.*/
     if (max_op > 200){
         printf("Error. Se exceden las 200 operaciones.\n");
         free(list_client_ops);
         return(-1);
     }
-    if (num_operacion > max_op){
+    if (num_operacion > max_op+1){
         printf("Error. El número de operaciones indicadas es mayor al permitido.\n");
         free(list_client_ops);
         return(-1);
@@ -219,6 +232,10 @@ int main (int argc, const char * argv[] ) {
     lista_cuentas = (int*) malloc((max_cuentas+1) * sizeof(int));
     for(int i = 0; i < max_cuentas + 1; i++){
         lista_cuentas[i] = -1;
+    }
+    //BORRAR
+    for (int i = 0; i<max_op; i++) {
+        printf("%s %s %s %d\n", list_client_ops[i].operacion, list_client_ops[i].cuenta, list_client_ops[i].cuenta2, list_client_ops[i].dinero);
     }
     // numero de cajeros y trabajadores
     int num_cajeros = atoi(argv[2]);

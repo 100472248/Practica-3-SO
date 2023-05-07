@@ -5,7 +5,7 @@
 struct element {
 	// Define the struct yourself
     int num_operacion; // numero de operacion, si no existe aun sera 0
-	char operacion [9]; // nombre de la operacion
+	char operacion [10]; // nombre de la operacion
     char cuenta1[3]; // numero de cuenta
     char cuenta2[3]; // segunda cuenta
     int cantidad; // cantidad a depositar
