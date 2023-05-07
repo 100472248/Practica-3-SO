@@ -81,7 +81,7 @@ int verifyStruct(struct operacion *clientes, int orden){
 
 void * cajero(struct operacion *lista_ops){
     struct element elemento;
-    for (int i = 0; i < max_op; i++) {
+    while(client_numop < max_op) {
         pthread_mutex_lock(&mut);
         while (queue_full(buffer) == 1) {
             pthread_cond_wait(&lleno, &mut);
@@ -100,13 +100,12 @@ void * cajero(struct operacion *lista_ops){
 }
 
 void * trabajador() {
-    struct element *elemento;
-    for (int i = 0; i < max_op; i++) {
+    while(bank_numop < max_op) {
         pthread_mutex_lock(&mut);
         while (queue_empty(buffer)== 1) {
             pthread_cond_wait(&vacio, &mut);
         }
-        elemento = queue_get(buffer);
+        struct element *elemento = queue_get(buffer);
         bank_numop++;
         // Proceso las operaciones
         // ¿Que pasa si hay un numero de cuenta mayor al numero maximo de cuentas?
@@ -132,6 +131,7 @@ void * trabajador() {
         else {
             printf("%d SALDO %s SALDO=%d TOTAL=%d", elemento->num_operacion, elemento->cuenta1, lista_cuentas[atoi(elemento->cuenta1)], global_balance);
         }
+        elemento->num_operacion = 0;
         pthread_cond_signal(&lleno);
         pthread_mutex_unlock(&mut);
     }
@@ -225,8 +225,8 @@ int main (int argc, const char * argv[] ) {
     buffer = queue_init(long_cola);
     /*Se crea una lista global donde se guarda el dinero de cada cuenta. Tiene longitud igual al máximo de cuentas (argv[4]).
     Para indicar que la cuenta no existe, le ponemos de valor -1. Inicialmente, no hay ninguna cuenta creada (todos -1).*/
-    lista_cuentas = (int*) malloc(max_cuentas * sizeof(int));
-    for(int i = 0; i < max_cuentas; i++){
+    lista_cuentas = (int*) malloc((max_cuentas+1) * sizeof(int));
+    for(int i = 0; i < max_cuentas + 1; i++){
         lista_cuentas[i] = -1;
     }
     // numero de cajeros y trabajadores

@@ -71,12 +71,7 @@ struct element* queue_get(struct queue *q) {
             break;
         }
     }
-	struct element *elemento;
-    elemento->num_operacion = q->elemento[j].num_operacion;
-	strcpy(elemento->operacion, q->elemento[j].operacion);
-    strcpy(elemento->cuenta1, q->elemento[j].cuenta1);
-    strcpy(elemento->cuenta2, q->elemento[j].cuenta2);
-    elemento->cantidad = q->elemento[j].cantidad;
+	struct element *elemento = &q->elemento[j];
     q->n_elementos--;
 	return elemento; // return element
 }
