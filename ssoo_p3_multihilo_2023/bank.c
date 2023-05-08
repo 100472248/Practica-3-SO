@@ -2,19 +2,11 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <fcntl.h>
 #include <stddef.h>
-#include <sys/stat.h>
 #include <pthread.h>
 #include "queue.h"
 #include <string.h>
 #include <sys/types.h>
-#include <sys/wait.h>
-#include <stdbool.h>
-#include <ctype.h>
-
-
 
 /**
  * Entry point
@@ -24,16 +16,15 @@
  */
 
 
-/*Se inicializan las variables globales*/
-int client_numop = 0, bank_numop = 0, global_balance = 0, max_op = 0, max_cuentas = 0, operaciones = 0;
-// Se crea una lista global donde se guarda el dinero de cada cuenta.
+//Se inicializan las variables globales
+int client_numop = 0, bank_numop = 0, global_balance = 0, operaciones = 0;
+// Se crea una lista global donde se guarda el dinero de cada cuenta
 int *lista_cuentas;
-/*Se crea la cola, el mutex y su condición.*/
+//Se crea la cola, el mutex y su condición
 struct queue *buffer;
 pthread_mutex_t mut;
 pthread_cond_t lleno, vacio;
-
-/*Para inidicar los datos de cada operación, se ha creado este struct.*/
+//Para almacenar los datos de cada operación, se ha creado este struct
 struct operacion {
     char operacion[10];
     char cuenta[3];
@@ -41,62 +32,32 @@ struct operacion {
     int dinero;
 };
 
-int verifyStruct(struct operacion *clientes, int orden){
-    // Para analizar si cada valor del struct cumple las condiciones dadas en el enunciado.
-    struct operacion cliente = clientes[orden];
-    int cuenta = 0;
-    if (strcmp(cliente.operacion, "CREAR") == 0) {
-        cuenta = atoi(cliente.cuenta);
-        if  (cuenta > max_cuentas) {
-            return 0;
-        }
-    }
-    if (strcmp(cliente.operacion, "INGRESAR") == 0 || strcmp(cliente.operacion, "RETIRAR") == 0) {
-        cuenta = atoi(cliente.cuenta);
-        if (cuenta > max_cuentas) {
-            return 0;
-        }
-    }
-    if (strcmp(cliente.operacion, "TRASPASAR") == 0) {
-        cuenta = atoi(cliente.cuenta);
-        if  (cuenta > max_cuentas) {
-            return 0;
-        }
-        cuenta = atoi(cliente.cuenta2);
-        if (cuenta > max_cuentas) {
-            return 0;
-        }
-    }
-    if (strcmp(cliente.operacion, "SALDO") == 0) {
-        cuenta = atoi(cliente.cuenta);
-        if  (cuenta > max_cuentas) {
-            return 0;
-        }
-    }
-    else {
-        return 0;
-    }
-    return 1;
-}
-
 void * cajero(struct operacion *lista_ops){
     struct element elemento;
+    // Mientras que no se hayan realizado las operaciones pedidas
     while(client_numop < operaciones) {
+        // Bloqueamos el mutex
         pthread_mutex_lock(&mut);
-        while (queue_full(buffer) == 1) {
+        // Si está vacía la cola, esperaremos a que se vacíe algun elemento
+        while ((queue_full(buffer) == 1) && (client_numop < operaciones)) {
             pthread_cond_wait(&lleno, &mut);
         }
+        // Si al salir del wait otro hilo cajero ya ha terminado con las operaciones correspondientes, salimos
         if (client_numop >= operaciones) {
             pthread_mutex_unlock(&mut);
             break;
         }
+        // Copiamos la operacion que toca de la lista a un elmemento que se añadirá a la cola
         elemento.num_operacion = client_numop + 1;
         strcpy(elemento.operacion, lista_ops[client_numop].operacion);
         strcpy(elemento.cuenta1, lista_ops[client_numop].cuenta);
         strcpy(elemento.cuenta2, lista_ops[client_numop].cuenta2);
         elemento.cantidad = lista_ops[client_numop].dinero;
+        // Actualizamos client_numop
         client_numop++;
+        // Escribimos el elemento en la cola
         queue_put(buffer, &elemento);
+        // Mandamos la señal de que la cola no está vacia y liberamos el mutex
         pthread_cond_signal(&vacio);
         pthread_mutex_unlock(&mut);
     }
@@ -104,20 +65,26 @@ void * cajero(struct operacion *lista_ops){
 }
 
 void * trabajador() {
+    // Mientras no se hayan procesado todas las operaciones
     while(bank_numop < operaciones) {
+        // Bloqueamos el mutex
         pthread_mutex_lock(&mut);
+        // Si el buffer está vacio esperamos a que se escriba algun elemento
         while ((queue_empty(buffer)== 1) && (bank_numop < operaciones)) {
             pthread_cond_wait(&vacio, &mut);
         }
+        // Si al salir del wait otro hilo trabajador ya ha terminado con las operaciones correspondientes, salimos
         if (bank_numop >= operaciones) {
             pthread_mutex_unlock(&mut);
             break;
         }
-        buffer->element_searching = bank_numop+1;
-        struct element *elemento = queue_get(buffer);
+        // Actualizamos bank_numop
         bank_numop++;
-        // Proceso las operaciones
-        // ¿Que pasa si hay un numero de cuenta mayor al numero maximo de cuentas?
+        // Actualizamos el elemento que se buscará en el buffer al numero de operacion bank_numop
+        buffer->element_searching = bank_numop;
+        // Cogemos el elemento y lo almacenamos
+        struct element *elemento = queue_get(buffer);
+        // Proceso las operaciones usando la lista con el dinero de cada cuenta e imprimimos la salida correspondiente
         if (strcmp(elemento->operacion, "CREAR") == 0) {
             lista_cuentas[atoi(elemento->cuenta1)] = 0;
             printf("%d CREAR %s SALDO=0 TOTAL=%d\n", elemento->num_operacion, elemento->cuenta1, global_balance);
@@ -125,22 +92,29 @@ void * trabajador() {
         else if (strcmp(elemento->operacion, "INGRESAR") == 0) {
             lista_cuentas[atoi(elemento->cuenta1)] += elemento->cantidad;
             global_balance += elemento->cantidad;
-            printf("%d INGRESAR %s %d SALDO=%d TOTAL=%d\n", elemento->num_operacion, elemento->cuenta1, elemento->cantidad, lista_cuentas[atoi(elemento->cuenta1)], global_balance);
+            printf("%d INGRESAR %s %d SALDO=%d TOTAL=%d\n", elemento->num_operacion, elemento->cuenta1,
+                   elemento->cantidad, lista_cuentas[atoi(elemento->cuenta1)], global_balance);
         }
         else if (strcmp(elemento->operacion, "RETIRAR") == 0) {
             lista_cuentas[atoi(elemento->cuenta1)] -= elemento->cantidad;
             global_balance -= elemento->cantidad;
-            printf("%d RETIRAR %s %d SALDO=%d TOTAL=%d\n", elemento->num_operacion, elemento->cuenta1, elemento->cantidad, lista_cuentas[atoi(elemento->cuenta1)], global_balance);
+            printf("%d RETIRAR %s %d SALDO=%d TOTAL=%d\n", elemento->num_operacion, elemento->cuenta1,
+                   elemento->cantidad, lista_cuentas[atoi(elemento->cuenta1)], global_balance);
         }
         else if (strcmp(elemento->operacion, "TRASPASAR") == 0) {
             lista_cuentas[atoi(elemento->cuenta1)] -= elemento->cantidad;
             lista_cuentas[atoi(elemento->cuenta2)] += elemento->cantidad;
-            printf("%d TRASPASAR %s %s %d SALDO=%d TOTAL=%d\n", elemento->num_operacion, elemento->cuenta1, elemento->cuenta2, elemento->cantidad, lista_cuentas[atoi(elemento->cuenta2)], global_balance);
+            printf("%d TRASPASAR %s %s %d SALDO=%d TOTAL=%d\n", elemento->num_operacion, elemento->cuenta1,
+                   elemento->cuenta2, elemento->cantidad, lista_cuentas[atoi(elemento->cuenta2)], global_balance);
         }
         else {
-            printf("%d SALDO %s SALDO=%d TOTAL=%d\n", elemento->num_operacion, elemento->cuenta1, lista_cuentas[atoi(elemento->cuenta1)], global_balance);
+            printf("%d SALDO %s SALDO=%d TOTAL=%d\n", elemento->num_operacion, elemento->cuenta1,
+                   lista_cuentas[atoi(elemento->cuenta1)], global_balance);
         }
+        /* Especificamos que la operacion ha sido procesada y ahora ese elemento está vacío poniendo el numero de
+           operacion a 0 */
         elemento->num_operacion = 0;
+        // Mandamos la señal de que la cola no está llena y liberamos el mutex
         pthread_cond_signal(&lleno);
         pthread_mutex_unlock(&mut);
     }
@@ -149,12 +123,12 @@ void * trabajador() {
 
 
 int main (int argc, const char * argv[] ) {
-    /*Como se tienen que meter 5 argumentos, argc debe valer 6 como mínimo.*/
+    // Comprobamos el numero de argumentos
     if (argc != 6){
         printf("Número de argumentos incorrecto.\n");
         return -1;
     }
-    /*Antes de empezar, vamos a comprobar que todo funciona correctamente.*/
+    // Comprobamos la validez de los argumentos
     if ((atoi(argv[2]) < 0) || (atoi(argv[3]) < 0)) {
         printf("Número de hilos negativo.\n");
         return -1;
@@ -167,109 +141,111 @@ int main (int argc, const char * argv[] ) {
         printf("Longitud de cola imposible.\n");
         return -1;
     }
-    max_cuentas = atoi(argv[4]);
-    /*next_op para escanear cadenas y cantidad para escanear cantidades de dinero*/
+    // Declaramos e inicializamos las variables que vamos a utilizar para la lectura y almacenamiento del fichero
     int cuentas = 0;
-    int cantidad;
+    int max_cuentas = atoi(argv[4]);
+    int cantidad = 0;
     int long_cola = atoi(argv[5]);
-    char next_op[10];
+    char next_element[10];
     FILE *fd;
-    /*Para diferenciar la lectura del max_op frente el resto de operaciones, marcamos num_operacion como -1 y lo pasamos a 0 cuando se
-    realice esta operación.*/
     int num_operacion = -1;
+    // Almacenaremos espacio dinamico para guardar la lista de structs operacion donde se almacenará cada operacion
     struct operacion *list_client_ops = (struct operacion*)malloc(sizeof(struct operacion) * 200);
     fd = fopen(argv[1], "r");
-    /*Como es un bucle con malloc, hemos decidido utilizar una variable soporte. Cuando no lea operaciones o haya una incorrecta, se termina.*/
-    while (feof(fd) == 0){
+    /* Mientras el fichero no se haya leido entero, iremos leyendo cada elemento con fscanf, ya sea un %d o un %s
+       y almacenaremos cada operacion en la lista de operaciones listclientops */
+    while (feof(fd) == 0) {
+        // La primera vez solo leeremos el numero de operaciones a procesar
         if (num_operacion == -1) {
-            fscanf(fd, "%d", &max_op);
+            fscanf(fd, "%d", &operaciones);
             num_operacion++;
             continue;
         }
-        fscanf(fd, "%s", next_op);
-        //printf("%s\n", next_op);
-        if (strcmp(next_op, "CREAR") == 0){
-            strcpy(list_client_ops[num_operacion].operacion, next_op);
-            fscanf(fd, "%s", next_op);
-            strcpy(list_client_ops[num_operacion].cuenta, next_op);
+        // Leemos la operacion y procesamos los siguientes elementos según la que sea, pues variarán los argumentos
+        fscanf(fd, "%s", next_element);
+        if (strcmp(next_element, "CREAR") == 0){
+            strcpy(list_client_ops[num_operacion].operacion, next_element);
+            fscanf(fd, "%s", next_element);
+            strcpy(list_client_ops[num_operacion].cuenta, next_element);
             num_operacion++;
             cuentas++;
         }
-        else if (strcmp(next_op, "INGRESAR") == 0 || strcmp(next_op, "RETIRAR") == 0 ){
-            strcpy(list_client_ops[num_operacion].operacion, next_op);
-            fscanf(fd, "%s", next_op);
-            strcpy(list_client_ops[num_operacion].cuenta, next_op);
-            fscanf(fd, "%d", &cantidad);
+        else if (strcmp(next_element, "INGRESAR") == 0 || strcmp(next_element, "RETIRAR") == 0 ){
+            strcpy(list_client_ops[num_operacion].operacion, next_element);
+            fscanf(fd, "%s %d", next_element, &cantidad);
+            strcpy(list_client_ops[num_operacion].cuenta, next_element);
             list_client_ops[num_operacion].dinero = cantidad;
             num_operacion++;
         }
-        else if (strcmp(next_op, "TRASPASAR") == 0) {
-            strcpy(list_client_ops[num_operacion].operacion, next_op);
-            fscanf(fd, "%s", next_op);
-            strcpy(list_client_ops[num_operacion].cuenta, next_op);
-            fscanf(fd, "%s", next_op);
-            strcpy(list_client_ops[num_operacion].cuenta2, next_op);
-            fscanf(fd, "%d", &cantidad);
+        else if (strcmp(next_element, "TRASPASAR") == 0) {
+            strcpy(list_client_ops[num_operacion].operacion, next_element);
+            fscanf(fd, "%s", next_element);
+            strcpy(list_client_ops[num_operacion].cuenta, next_element);
+            fscanf(fd, "%s %d", next_element, &cantidad);
+            strcpy(list_client_ops[num_operacion].cuenta2, next_element);
             list_client_ops[num_operacion].dinero = cantidad;
             num_operacion++;
         }
-        else if (strcmp(next_op, "SALDO") == 0) {
-            strcpy(list_client_ops[num_operacion].operacion, next_op);
-            fscanf(fd, "%s", next_op);
-            strcpy(list_client_ops[num_operacion].cuenta, next_op);
+        else if (strcmp(next_element, "SALDO") == 0) {
+            strcpy(list_client_ops[num_operacion].operacion, next_element);
+            fscanf(fd, "%s", next_element);
+            strcpy(list_client_ops[num_operacion].cuenta, next_element);
             num_operacion++;
         }
-        verifyStruct(list_client_ops, num_operacion);
     }
     fclose(fd);
-    operaciones = num_operacion;
-    /*Se analiza si max_op es correcta.*/
-    if (max_op > 200){
+    // Comprobamos si no se exceden las 200 operaciones
+    if (operaciones > 200){
         printf("Error. Se exceden las 200 operaciones.\n");
         free(list_client_ops);
         return(-1);
     }
-    if (num_operacion != max_op){
+    // Comprobamos que el numero de operaciones es correcto
+    if (num_operacion != operaciones){
         printf("Error. El número de operaciones indicadas es mayor al permitido.\n");
         free(list_client_ops);
         return(-1);
     }
+    // Comprobamos que no se crean mas cuentas de las permitidas
     if (cuentas > max_cuentas){
-        printf("Error\n");
+        printf("Error. El número de cuentas es mayor al permitido\n");
         free(list_client_ops);
         return(-1);
     }
-    // inicializar condiciones y mutex
+    // Inicializar condiciones y mutex
     pthread_mutex_init(&mut, NULL);
     pthread_cond_init(&lleno, NULL);
     pthread_cond_init(&vacio, NULL);
-    // inicializar cola
+    // Inicializar cola
     buffer = queue_init(long_cola);
-    /*Se crea una lista global donde se guarda el dinero de cada cuenta. Tiene longitud igual al máximo de cuentas (argv[4]).
-    Para indicar que la cuenta no existe, le ponemos de valor -1. Inicialmente, no hay ninguna cuenta creada (todos -1).*/
+    /* Se crea una lista global almacenando espacio dinamico donde se guarda el dinero de cada cuenta.
+       Tiene longitud igual al máximo de cuentas + 1, ya que será necesario para poder acceder correctamente usando
+       los numeros de cuenta. Para indicar que la cuenta no existe, le ponemos valor -1.
+       Inicialmente, no hay ninguna cuenta creada (todos -1). */
     lista_cuentas = (int*) malloc((max_cuentas+1) * sizeof(int));
     for(int i = 0; i < max_cuentas + 1; i++){
         lista_cuentas[i] = -1;
     }
-    // numero de cajeros y trabajadores
+    // Numero de cajeros y trabajadores
     int num_cajeros = atoi(argv[2]);
     int num_trabajadores = atoi(argv[3]);
-    // crear los threads
+    // Crear los threads
     pthread_t cajeros[num_cajeros], trabajadores[num_trabajadores];
     for (int i = 0; i < num_cajeros; i ++) {
         pthread_create(&cajeros[i], NULL, (void*)cajero, list_client_ops); }
     for (int j = 0; j < num_trabajadores; j++) {
         pthread_create(&trabajadores[j], NULL, (void*)trabajador, NULL); }
-    // joins
+    // Joins por los threads
     for (int i = 0; i < num_cajeros; i++) {
         pthread_join(cajeros[i], NULL); }
     for (int j = 0; j < num_trabajadores; j++) {
         pthread_join(trabajadores[j], NULL); }
-    // destruir condiciones y mutex
+    // Destruir condiciones y mutex
     pthread_cond_destroy(&lleno);
     pthread_cond_destroy(&vacio);
     pthread_mutex_destroy(&mut);
     queue_destroy(buffer);
+    // Liberar la memoria dinámica reservada anteriormente
     free(lista_cuentas);
     free(list_client_ops);
     return 0;

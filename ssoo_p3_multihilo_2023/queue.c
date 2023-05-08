@@ -1,17 +1,16 @@
 //SSOO-P3 2022-2023
 
-#include <stdio.h>
 #include <stdlib.h>
-#include <stddef.h>
 #include <string.h>
 #include "queue.h"
 
-
-
-//To create a queue
+// Para crear la cola
 queue* queue_init(int size){
+    /* Almacenamos espacio dinamicamente para la cola y para la lista de elementos
+       para almacenar las operaciones de la misma */
     struct queue *q = (struct queue *)malloc(sizeof(struct queue));
     q->elemento = (struct element *)malloc(size * sizeof(struct element));
+    // Inicializamos el tamaño, la operacion a buscar, y el numero de elementos
     q->size = size;
     q->element_searching = 0;
     q->n_elementos = 0;
@@ -19,58 +18,49 @@ queue* queue_init(int size){
     for (int i = 0; i < q->size; i++) {
         q->elemento[i].num_operacion = 0;
     }
-	return q;
+    return q;
 }
 
-
-// To Enqueue an element
+// Para escribir un elemento
 int queue_put(struct queue *q, struct element* x) {
-    // first check capacity before puting an element
     int j = 0;
-    int check_capacity = queue_full(q);
-    while (1 == check_capacity) {   // hacer loops hasta que la queue no este llena
-        check_capacity = queue_full(q);
-    }
-    // Ponemos el elemento en la primera casilla despues del elemento mas avanzado en la cola
+    // Buscamos un hueco (num_operacion = 0)
     for (int i = 0; i < q->size; i++) {
         if (q->elemento[i].num_operacion == 0) {
             j = i;
             break;
         }
     }
-    // No merece la pena mirar si es una operacion u otra para poner los elementos
-    // ya que de igual forma los que no existan por como es la operacion van a ser NULL
+    // Escribimos el elemento en el hueco encontrado
     q->elemento[j].num_operacion = x->num_operacion;
     strcpy(q->elemento[j].operacion, x->operacion);
     strcpy(q->elemento[j].cuenta1, x->cuenta1);
     strcpy(q->elemento[j].cuenta2, x->cuenta2);
     q->elemento[j].cantidad = x->cantidad;
+    // Actualizamos el numero de elementos de la cola
     q->n_elementos++;
-	return 0;
+    return 0;
 }
 
 
 // To Dequeue an element.
 struct element* queue_get(struct queue *q) {
     int j = 0;
-    int check_capacity = queue_empty(q);
-    while (1 == check_capacity){
-        check_capacity = queue_empty(q); // hacer loops que la queue tenga un elemento
-    }
-    // Buscamos el primer elemento lleno de la cola
+    // Buscamos elemento que contenga la operacion con el numero de operacion que buscamos
     for (int i = 0; i < q->size; i++) {
         if (q->elemento[i].num_operacion == q->element_searching) {
             j = i;
             break;
         }
     }
-	struct element *elemento = &q->elemento[j];
+    // Devolvemos un puntero a la direccion donde empieza ese elemento
+    struct element *elemento = &q->elemento[j];
+    // Actualizamos el numero de elementos
     q->n_elementos--;
-	return elemento; // return element
+    return elemento; // return element
 }
 
-
-//To check queue state
+// Mirar si la cola está vacía
 int queue_empty(struct queue *q){
     if (q->n_elementos == 0) {
         return 1;
@@ -78,6 +68,7 @@ int queue_empty(struct queue *q){
     return 0;
 }
 
+// Mirar si la cola está llena
 int queue_full(struct queue *q){
     if (q->n_elementos == q->size) {
         return 1;
@@ -85,11 +76,11 @@ int queue_full(struct queue *q){
     return 0;
 }
 
-//To destroy the queue and free the resources
+// Destruir la cola y liberar memoria
 int queue_destroy(struct queue *q){
     free(q->elemento);
     free(q);
-	return 0;
+    return 0;
 }
 
 // for testing the queue
