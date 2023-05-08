@@ -229,7 +229,7 @@ int main (int argc, const char * argv[] ) {
         free(list_client_ops);
         return(-1);
     }
-    if (num_operacion > max_op){
+    if (num_operacion != max_op){
         printf("Error. El número de operaciones indicadas es mayor al permitido.\n");
         free(list_client_ops);
         return(-1);
