@@ -84,24 +84,26 @@ void * trabajador() {
         buffer->element_searching = bank_numop;
         // Cogemos el elemento y lo almacenamos
         struct element *elemento = queue_get(buffer);
-        // Proceso las operaciones usando la lista con el dinero de cada cuenta e imprimimos la salida correspondiente
+        /* Proceso las operaciones usando la lista con el dinero de cada cuenta siempre y cuando exista tal
+           cuenta (el dinero no es -1) e imprimimos la salida correspondiente */
         if (strcmp(elemento->operacion, "CREAR") == 0) {
             lista_cuentas[atoi(elemento->cuenta1)] = 0;
             printf("%d CREAR %s SALDO=0 TOTAL=%d\n", elemento->num_operacion, elemento->cuenta1, global_balance);
         }
-        else if (strcmp(elemento->operacion, "INGRESAR") == 0) {
+        else if ((strcmp(elemento->operacion, "INGRESAR") == 0) && (lista_cuentas[atoi(elemento->cuenta1)] != -1)) {
             lista_cuentas[atoi(elemento->cuenta1)] += elemento->cantidad;
             global_balance += elemento->cantidad;
             printf("%d INGRESAR %s %d SALDO=%d TOTAL=%d\n", elemento->num_operacion, elemento->cuenta1,
                    elemento->cantidad, lista_cuentas[atoi(elemento->cuenta1)], global_balance);
         }
-        else if (strcmp(elemento->operacion, "RETIRAR") == 0) {
+        else if ((strcmp(elemento->operacion, "RETIRAR") == 0) && (lista_cuentas[atoi(elemento->cuenta1)] != -1)) {
             lista_cuentas[atoi(elemento->cuenta1)] -= elemento->cantidad;
             global_balance -= elemento->cantidad;
             printf("%d RETIRAR %s %d SALDO=%d TOTAL=%d\n", elemento->num_operacion, elemento->cuenta1,
                    elemento->cantidad, lista_cuentas[atoi(elemento->cuenta1)], global_balance);
         }
-        else if (strcmp(elemento->operacion, "TRASPASAR") == 0) {
+        else if ((strcmp(elemento->operacion, "TRASPASAR") == 0) &&
+        (lista_cuentas[atoi(elemento->cuenta1)] != -1) && (lista_cuentas[atoi(elemento->cuenta2)] != -1)) {
             lista_cuentas[atoi(elemento->cuenta1)] -= elemento->cantidad;
             lista_cuentas[atoi(elemento->cuenta2)] += elemento->cantidad;
             printf("%d TRASPASAR %s %s %d SALDO=%d TOTAL=%d\n", elemento->num_operacion, elemento->cuenta1,
@@ -152,6 +154,10 @@ int main (int argc, const char * argv[] ) {
     // Almacenaremos espacio dinamico para guardar la lista de structs operacion donde se almacenará cada operacion
     struct operacion *list_client_ops = (struct operacion*)malloc(sizeof(struct operacion) * 200);
     fd = fopen(argv[1], "r");
+    if (fd == NULL) {
+        printf("Error al abrir el fichero");
+        return -1;
+    }
     /* Mientras el fichero no se haya leido entero, iremos leyendo cada elemento con fscanf, ya sea un %d o un %s
        y almacenaremos cada operacion en la lista de operaciones listclientops */
     while (feof(fd) == 0) {
@@ -222,8 +228,8 @@ int main (int argc, const char * argv[] ) {
        Tiene longitud igual al máximo de cuentas + 1, ya que será necesario para poder acceder correctamente usando
        los numeros de cuenta. Para indicar que la cuenta no existe, le ponemos valor -1.
        Inicialmente, no hay ninguna cuenta creada (todos -1). */
-    lista_cuentas = (int*) malloc((max_cuentas+1) * sizeof(int));
-    for(int i = 0; i < max_cuentas + 1; i++){
+    lista_cuentas = (int*) malloc((cuentas+1) * sizeof(int));
+    for(int i = 0; i < cuentas + 1; i++){
         lista_cuentas[i] = -1;
     }
     // Numero de cajeros y trabajadores
