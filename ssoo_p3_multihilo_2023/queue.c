@@ -12,9 +12,8 @@
 queue* queue_init(int size){
     struct queue *q = (struct queue *)malloc(sizeof(struct queue));
     q->elemento = (struct element *)malloc(size * sizeof(struct element));
-    q->head = 0;
-    q->tail = size;
     q->size = size;
+    q->element_searching = 0;
     q->n_elementos = 0;
     // Ponemos el numero de operacion a 0 para indicar que eso significa que no existe la operacion aun
     for (int i = 0; i < q->size; i++) {
@@ -33,16 +32,10 @@ int queue_put(struct queue *q, struct element* x) {
         check_capacity = queue_full(q);
     }
     // Ponemos el elemento en la primera casilla despues del elemento mas avanzado en la cola
-    for (int i = q->size - 1; i >= 0; i--) {
-        if (q->elemento[i].num_operacion != 0) {
-            if (i != q->size - 1) {
-                j = i + 1;
-                break;
-            }
-            else {
-                j = 0;
-                break;
-            }
+    for (int i = 0; i < q->size; i++) {
+        if (q->elemento[i].num_operacion == 0) {
+            j = i;
+            break;
         }
     }
     // No merece la pena mirar si es una operacion u otra para poner los elementos
@@ -66,7 +59,7 @@ struct element* queue_get(struct queue *q) {
     }
     // Buscamos el primer elemento lleno de la cola
     for (int i = 0; i < q->size; i++) {
-        if (q->elemento[i].num_operacion != 0) {
+        if (q->elemento[i].num_operacion == q->element_searching) {
             j = i;
             break;
         }

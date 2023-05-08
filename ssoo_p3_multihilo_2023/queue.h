@@ -15,9 +15,9 @@ struct element {
 typedef struct queue {
 	// Define the struct yourself
 	 struct element * elemento;
-     int head; // indice para el primer elemento del queue
-     int tail; // indice para el ultimo elemento del queue
+
      int size;
+     int element_searching;
      int n_elementos;
 }queue;
 
