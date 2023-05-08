@@ -109,7 +109,7 @@ void * trabajador() {
             printf("%d TRASPASAR %s %s %d SALDO=%d TOTAL=%d\n", elemento->num_operacion, elemento->cuenta1,
                    elemento->cuenta2, elemento->cantidad, lista_cuentas[atoi(elemento->cuenta2)], global_balance);
         }
-        else {
+        else if ((strcmp(elemento->operacion, "SALDO") == 0) && (lista_cuentas[atoi(elemento->cuenta1)] != -1)) {
             printf("%d SALDO %s SALDO=%d TOTAL=%d\n", elemento->num_operacion, elemento->cuenta1,
                    lista_cuentas[atoi(elemento->cuenta1)], global_balance);
         }
@@ -131,8 +131,8 @@ int main (int argc, const char * argv[] ) {
         return -1;
     }
     // Comprobamos la validez de los argumentos
-    if ((atoi(argv[2]) < 0) || (atoi(argv[3]) < 0)) {
-        printf("Número de hilos negativo.\n");
+    if ((atoi(argv[2]) < 1) || (atoi(argv[3]) < 1)) {
+        printf("Número de hilos incorrecto.\n");
         return -1;
     }
     if (atoi(argv[4]) < 1){
@@ -155,7 +155,7 @@ int main (int argc, const char * argv[] ) {
     struct operacion *list_client_ops = (struct operacion*)malloc(sizeof(struct operacion) * 200);
     fd = fopen(argv[1], "r");
     if (fd == NULL) {
-        printf("Error al abrir el fichero");
+        printf("Error al abrir el fichero\n");
         return -1;
     }
     /* Mientras el fichero no se haya leido entero, iremos leyendo cada elemento con fscanf, ya sea un %d o un %s
@@ -208,7 +208,7 @@ int main (int argc, const char * argv[] ) {
     }
     // Comprobamos que el numero de operaciones es correcto
     if (num_operacion != operaciones){
-        printf("Error. El número de operaciones indicadas es mayor al permitido.\n");
+        printf("Error. El número de operaciones es incorrecto.\n");
         free(list_client_ops);
         return(-1);
     }
